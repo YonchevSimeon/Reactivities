@@ -9,6 +9,8 @@ namespace API
     using Microsoft.EntityFrameworkCore;
     using MediatR;
     using Application.Activities;
+    using FluentValidation.AspNetCore;
+    using Middleware;
 
     public class Startup
     {
@@ -21,7 +23,7 @@ namespace API
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(opts => 
+            services.AddDbContext<DataContext>(opts =>
             {
                 opts.UseSqlite(this.Configuration.GetConnectionString("DefaultConnection"));
             });
@@ -39,18 +41,25 @@ namespace API
 
             services.AddMediatR(typeof(List.Handler).Assembly);
 
-            services.AddControllers();
+            services
+                .AddControllers()
+                .AddFluentValidation(cfg => 
+                {
+                    cfg.RegisterValidatorsFromAssemblyContaining<Create>();
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
             }
 
             app.UseCors("CorsPolicy");
- 
+
             //app.UseHttpsRedirection();
 
             app.UseRouting();
