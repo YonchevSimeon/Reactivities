@@ -11,6 +11,15 @@ namespace API
     using Application.Activities;
     using FluentValidation.AspNetCore;
     using Middleware;
+    using Domain;
+    using Microsoft.AspNetCore.Identity;
+    using Application.Interfaces;
+    using Infrastructure.Security;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.IdentityModel.Tokens;
+    using System.Text;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc.Authorization;
 
     public class Startup
     {
@@ -42,11 +51,39 @@ namespace API
             services.AddMediatR(typeof(List.Handler).Assembly);
 
             services
-                .AddControllers()
-                .AddFluentValidation(cfg => 
+                .AddControllers(opt =>
+                {
+                    AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+                    opt.Filters.Add(new AuthorizeFilter(policy));
+                })
+                .AddFluentValidation(cfg =>
                 {
                     cfg.RegisterValidatorsFromAssemblyContaining<Create>();
                 });
+
+            IdentityBuilder builder = services.AddIdentityCore<AppUser>();
+            IdentityBuilder identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
+            identityBuilder.AddEntityFrameworkStores<DataContext>();
+            identityBuilder.AddSignInManager<SignInManager<AppUser>>();
+
+            SymmetricSecurityKey key =
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["TokenKey"]));
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = key,
+                        ValidateAudience = false,
+                        ValidateIssuer = false
+                    };
+                });
+
+            services.AddScoped<IJwtGenerator, JwtGenerator>();
+            services.AddScoped<IUserAccessor, UserAccessor>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -58,12 +95,12 @@ namespace API
                 //app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors("CorsPolicy");
-
             //app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors("CorsPolicy");
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
