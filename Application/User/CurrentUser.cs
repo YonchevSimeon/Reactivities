@@ -6,6 +6,7 @@ namespace Application.User
     using Domain;
     using MediatR;
     using Microsoft.AspNetCore.Identity;
+    using System.Linq;
 
     public class CurrentUser
     {
@@ -33,7 +34,7 @@ namespace Application.User
                     DisplayName = appUser.DisplayName,
                     Username = appUser.UserName,
                     Token = this.jwtGenerator.CreateToken(appUser),
-                    Image = null
+                    Image = appUser.Photos.FirstOrDefault(x => x.IsMain)?.Url
                 };
 
                 return user;

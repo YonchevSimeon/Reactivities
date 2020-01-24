@@ -21,6 +21,7 @@ namespace API
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc.Authorization;
     using AutoMapper;
+    using Infrastructure.Photos;
 
     public class Startup
     {
@@ -98,6 +99,9 @@ namespace API
 
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IUserAccessor, UserAccessor>();
+            services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+
+            services.Configure<CloudinarySettings>(this.Configuration.GetSection("Cloudinary"));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

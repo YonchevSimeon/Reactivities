@@ -9,6 +9,7 @@ namespace Application.User
     using Microsoft.AspNetCore.Identity;
     using Errors;
     using System.Net;
+    using System.Linq;
 
     public class Login
     {
@@ -56,7 +57,7 @@ namespace Application.User
                         DisplayName = user.DisplayName,
                         Token = this.jwtGenerator.CreateToken(user),
                         Username = user.UserName,
-                        Image = null
+                        Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
                     };
                 }
 
