@@ -3,6 +3,7 @@ namespace Application.Activities.DTOs
     using System;
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
+    using Comments.DTOs;
 
     public class ActivityDto
     {
@@ -22,5 +23,7 @@ namespace Application.Activities.DTOs
 
         [JsonPropertyName("attendees")]
         public ICollection<AttendeeDto> UserActivities { get; set;}
+
+        public ICollection<CommentDto> Comments { get; set; }
     }
 }

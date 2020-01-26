@@ -22,6 +22,10 @@ namespace API
     using Microsoft.AspNetCore.Mvc.Authorization;
     using AutoMapper;
     using Infrastructure.Photos;
+    using SignalR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Primitives;
+    using System.Threading.Tasks;
 
     public class Startup
     {
@@ -47,13 +51,16 @@ namespace API
                     policy
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("http://localhost:3000");
+                        .WithOrigins("http://localhost:3000")
+                        .AllowCredentials();
                 });
             });
 
             services.AddMediatR(typeof(List.Handler).Assembly);
 
             services.AddAutoMapper(typeof(List.Handler));
+
+            services.AddSignalR();
 
             services
                 .AddControllers(opt =>
@@ -72,11 +79,11 @@ namespace API
             identityBuilder.AddEntityFrameworkStores<DataContext>();
             identityBuilder.AddSignInManager<SignInManager<AppUser>>();
 
-            services.AddAuthorization(opts => 
+            services.AddAuthorization(opts =>
             {
-                opts.AddPolicy("IsActivityHost", policy => 
+                opts.AddPolicy("IsActivityHost", policy =>
                 {
-                   policy.Requirements.Add(new IsHostRequirement()); 
+                    policy.Requirements.Add(new IsHostRequirement());
                 });
             });
 
@@ -94,6 +101,21 @@ namespace API
                         IssuerSigningKey = key,
                         ValidateAudience = false,
                         ValidateIssuer = false
+                    };
+
+                    opt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            StringValues accessToken = context.Request.Query["access_token"];
+                            PathString path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chat"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 
@@ -124,6 +146,7 @@ namespace API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chat");
             });
         }
     }
