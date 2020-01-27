@@ -26,6 +26,7 @@ namespace API
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Primitives;
     using System.Threading.Tasks;
+    using Application.Profiles;
 
     public class Startup
     {
@@ -122,6 +123,7 @@ namespace API
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.AddScoped<IProfileReader, ProfileReader>();
 
             services.Configure<CloudinarySettings>(this.Configuration.GetSection("Cloudinary"));
         }
