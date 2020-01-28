@@ -7,7 +7,6 @@ namespace Application.Profiles
     using MediatR;
     using Persistence;
     using Interfaces;
-    using Errors;
     using Microsoft.EntityFrameworkCore;
     using Domain;
 
