@@ -14,15 +14,16 @@ const validate = combineValidators({
 interface IProps {
   updateProfile: (profile: Partial<IProfile>) => void;
   profile: IProfile;
+  loading: boolean;
 }
 
-const ProfileEditForm: React.FC<IProps> = ({ updateProfile, profile }) => {
+const ProfileEditForm: React.FC<IProps> = ({ updateProfile, profile, loading }) => {
   return (
     <FinalForm
       onSubmit={updateProfile}
       validate={validate}
       initialValues={profile!}
-      render={({ handleSubmit, invalid, pristine, submitting }) => (
+      render={({ handleSubmit, invalid, pristine }) => (
         <Form onSubmit={handleSubmit} error>
           <Field
             name="displayName"
@@ -38,7 +39,7 @@ const ProfileEditForm: React.FC<IProps> = ({ updateProfile, profile }) => {
             value={profile!.bio}
           />
           <Button
-            loading={submitting}
+            loading={loading}
             floated="right"
             disabled={invalid || pristine}
             positive

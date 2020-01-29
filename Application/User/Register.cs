@@ -72,15 +72,15 @@ namespace Application.User
                 };
 
                 IdentityResult result = await this.userManager.CreateAsync(user, request.Password);
-
+                
                 if (result.Succeeded)
                 {
                     return new User
                     {
                         DisplayName = user.DisplayName,
                         Token = this.jwtGenerator.CreateToken(user),
-                        Username = user.UserName,
-                        Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
+                        Username = user.UserName
+                        //Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
                     };
                 }
 

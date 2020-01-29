@@ -3,12 +3,17 @@ import { RootStoreContext } from "../../app/stores/rootStore";
 import { Tab, Grid, Header, Button } from "semantic-ui-react";
 import { observer } from "mobx-react-lite";
 import ProfileEditForm from "./ProfileEditForm";
+import { IProfile } from "../../app/models/profile";
 
 const ProfileDescription = () => {
   const rootStore = useContext(RootStoreContext);
-  const { updateProfile, profile, isCurrentUser } = rootStore.profileStore;
+  const { updateProfile, profile, isCurrentUser, updatingProfile } = rootStore.profileStore;
 
   const [editMode, setEditMode] = useState(false);
+
+  const handleUpdateProfile = (profile: Partial<IProfile>) => {
+    updateProfile(profile).then(() => setEditMode(false));
+  };
 
   return (
     <Tab.Pane>
@@ -30,7 +35,7 @@ const ProfileDescription = () => {
         </Grid.Column>
         <Grid.Column width={16}>
           {editMode ? (
-            <ProfileEditForm updateProfile={updateProfile} profile={profile!} />
+            <ProfileEditForm updateProfile={handleUpdateProfile} profile={profile!} loading={updatingProfile} />
           ) : (
             <span>{profile!.bio}</span>
           )}

@@ -31,6 +31,7 @@ export default class ProfileStore {
   @observable activeTab: number = 0;
   @observable userActivities: IUserActivity[] = [];
   @observable loadingActivities = false;
+  @observable updatingProfile = false;
 
   @computed get isCurrentUser() {
     if (this.rootStore.userStore.user && this.profile) {
@@ -141,6 +142,7 @@ export default class ProfileStore {
   };
 
   @action updateProfile = async (profile: Partial<IProfile>) => {
+    this.updatingProfile = true;
     try {
       await agent.Profiles.updateProfile(profile);
       runInAction(() => {
@@ -150,10 +152,14 @@ export default class ProfileStore {
           this.rootStore.userStore.user!.displayName = profile.displayName!;
         }
         this.profile = { ...this.profile!, ...profile };
+        this.updatingProfile = false;
       });
     } catch (error) {
-      console.log(error);
+      runInAction(() => {
+        this.updatingProfile = false;
+      });
       toast.error("Problem updating profile");
+      console.log(error);
     }
   };
 
