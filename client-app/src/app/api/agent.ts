@@ -25,9 +25,18 @@ axios.interceptors.response.use(undefined, error => {
     toast.error("Network error - make sure API is running!");
   }
 
-  const { status, data, config } = error.response;
+  const { status, data, config, headers } = error.response;
   if (status === 404) {
     history.push("/notfound");
+  }
+
+  if (
+    status === 401 &&
+    headers["www-authenticate"].startsWith(`Bearer error="invalid_token", error_description="The token expired at `)
+  ) {
+    window.localStorage.removeItem("jwt");
+    history.push("/");
+    toast.info("Your session has expired, please log in again");
   }
 
   if (
@@ -86,7 +95,10 @@ const requests = {
 
 const Activities = {
   list: (params: URLSearchParams): Promise<IActivitiesEnvelope> =>
-    axios.get("/activities", {params: params}).then(sleep(1000)).then(responseBody),
+    axios
+      .get("/activities", { params: params })
+      .then(sleep(1000))
+      .then(responseBody),
   details: (id: string) => requests.get(`/activities/${id}`),
   create: (activity: IActivity) => requests.post("/activities", activity),
   update: (activity: IActivity) =>
@@ -118,7 +130,7 @@ const Profiles = {
   unfollow: (username: string) => requests.del(`/profiles/${username}/follow`),
   listFollowings: (username: string, predicate: string) =>
     requests.get(`/profiles/${username}/follow?predicate=${predicate}`),
-    listActivities: (username: string, predicate: string) => 
+  listActivities: (username: string, predicate: string) =>
     requests.get(`/profiles/${username}/activities?predicate=${predicate}`)
 };
 
