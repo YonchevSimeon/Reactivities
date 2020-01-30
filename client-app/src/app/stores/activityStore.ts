@@ -1,4 +1,4 @@
-import { observable, action, computed, runInAction, reaction } from "mobx";
+import { observable, action, computed, runInAction, reaction, toJS } from "mobx";
 import { SyntheticEvent } from "react";
 import { IActivity } from "./../models/activity";
 import agent from "../api/agent";
@@ -97,7 +97,7 @@ export default class ActivityStore {
     });
 
     this.hubConnection.on("Send", message => {
-      toast.info(message);
+      //toast.info(message);
     });
   };
 
@@ -106,7 +106,7 @@ export default class ActivityStore {
       .then(() => {
         this.hubConnection!.stop();
       })
-      .then(() => console.log("Connection stopped"))
+      //.then(() => console.log("Connection stopped"))
       .catch(error => console.log(error));
   };
 
@@ -168,7 +168,7 @@ export default class ActivityStore {
     let activity = this.getActivity(id);
     if (activity) {
       this.activity = activity;
-      return activity;
+      return toJS(activity);
     } else {
       this.loadingInitial = true;
       try {

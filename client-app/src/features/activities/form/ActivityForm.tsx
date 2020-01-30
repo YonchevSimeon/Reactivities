@@ -96,9 +96,9 @@ const ActivityForm: React.FC<RouteComponentProps<DetailsParams>> = ({
                   component={TextAreaInput}
                 />
                 <Field
+                  value={activity.category}
                   name="category"
                   placeholder="Category"
-                  value={activity.category}
                   component={SelectInput}
                   options={category}
                 />
