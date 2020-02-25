@@ -43,7 +43,7 @@ namespace API
             services.AddDbContext<DataContext>(opts =>
             {
                 opts.UseLazyLoadingProxies();
-                opts.UseSqlite(this.Configuration.GetConnectionString("DefaultConnection"));
+                opts.UseMySql(this.Configuration.GetConnectionString("DefaultConnection"));
             });
 
             services.AddCors(opts =>
@@ -143,6 +143,9 @@ namespace API
 
             //app.UseHttpsRedirection();
 
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
             app.UseRouting();
             app.UseCors("CorsPolicy");
 
@@ -153,6 +156,7 @@ namespace API
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHub>("/chat");
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }
